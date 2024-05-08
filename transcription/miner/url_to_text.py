@@ -19,7 +19,7 @@ proxy_url = os.getenv('PROXY_URL')
 
 def proccessing_url(url: str) -> str:
     audio_url = url
-    segment = (0, 30)
+    segment = (0, 200)
     try:
         output_filepath = download_youtube_segment(audio_url, segment)
         

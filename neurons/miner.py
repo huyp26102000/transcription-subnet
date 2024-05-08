@@ -19,6 +19,7 @@
 import time
 import typing
 import bittensor as bt
+import datetime
 
 # Bittensor Miner Template:
 import transcription
@@ -152,7 +153,13 @@ class RequestData(BaseModel):
 @app.post('/generate')
 async def generate(request_data: RequestData):
     try:
-        return proccessing_url(request_data.url)
+        start_time = datetime.datetime.now()
+        result = proccessing_url(request_data.url)
+        end_time = datetime.datetime.now()
+        elapsed_time = end_time - start_time
+        elapsed_seconds = elapsed_time.total_seconds()
+        bt.logging.info(f'Task completed in {elapsed_seconds:.2f} seconds')
+        return result
     
     except Exception as e:
         print(f"Failed during model loading or transcription: {e}")
