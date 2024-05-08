@@ -17,6 +17,30 @@ load_dotenv()
 recognition_model = SpeakerRecognition.from_hparams(source="speechbrain/lang-id-commonlanguage_ecapa", savedir="tmpdir")
 proxy_url = os.getenv('PROXY_URL')
 
+def proccessing_url(url: str) -> str:
+    audio_url = url
+    segment = (0, 30)
+    try:
+        output_filepath = download_youtube_segment(audio_url, segment)
+        
+        if not os.path.exists(output_filepath):
+            print("Output file does not exist. Returning empty transcription.")
+            start, _ = segment
+            return format_transcription(start, "")
+        
+        transcription = transcribe_with_whisper(output_filepath)
+
+        print("---miner transcript--")
+        print(transcription)
+        print("---------------------")
+
+        start, _ = segment
+        return format_transcription(start, transcription)
+    
+    except Exception as e:
+        print(f"Failed during model loading or transcription: {e}")
+        return ""
+
 def url_to_text(self, synapse: Transcription) -> str:
     audio_url = synapse.audio_input
     segment = synapse.segment

@@ -26,7 +26,10 @@ import transcription
 # import base miner class which takes care of most of the boilerplate
 from transcription.base.miner import BaseMinerNeuron
 from transcription.miner.audio_to_text import audio_to_text
-from transcription.miner.url_to_text import url_to_text
+from transcription.miner.url_to_text import url_to_text, proccessing_url
+from fastapi import FastAPI, HTTPException
+from transcription.protocol import Transcription
+from pydantic import BaseModel
 
 class Miner(BaseMinerNeuron):
     """
@@ -142,9 +145,28 @@ class Miner(BaseMinerNeuron):
         )
         return prirority
 
+app = FastAPI()
+class RequestData(BaseModel):
+    url: str
+
+@app.post('/generate')
+async def generate(request_data: RequestData):
+    try:
+        return proccessing_url(request_data.url)
+    
+    except Exception as e:
+        print(f"Failed during model loading or transcription: {e}")
+        return ""
+
 # This is the main function, which runs the miner.
 if __name__ == "__main__":
+    import uvicorn
     with Miner() as miner:
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=14735,
+        )
         while True:
             bt.logging.info("Miner running...", time.time())
             time.sleep(5)
